@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  bookstore
 //
-//  Created by user168036 on 4/3/20.
+//  Created by user168029 on 4/3/20.
 //  Copyright © 2020 Tec. All rights reserved.
 //
 
@@ -15,8 +15,9 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     
    
-     @IBOutlet weak var myTableView: UITableView!
-     var managedObjectContext: NSManagedObjectContext!
+    @IBOutlet weak var myTableView: UITableView!
+    var managedObjectContext: NSManagedObjectContext!
+    var selectedBooksArray : [Book] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +52,25 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         let book: Book = loadBooks()[indexPath.row]
         cell.textLabel?.text = book.title
+        cell.accessoryType = .none
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let books: [Book] = loadBooks()
+        
+        if let cell = tableView.cellForRow(at: indexPath) {
+            if selectedBooksArray.contains(books[indexPath.row]) {
+                cell.accessoryType = .none
+                if let selectedBookIndex = selectedBooksArray.firstIndex(of: books[indexPath.row]) {
+                    selectedBooksArray.remove(at: selectedBookIndex)
+                }
+            } else {
+                cell.accessoryType = .checkmark
+                selectedBooksArray.append(books[indexPath.row])
+            }
+        }
+        NSLog("You selected cell number: \(indexPath.row)!")
     }
     
     @IBAction func addNew(_ sender: UIBarButtonItem) {
@@ -65,5 +84,16 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         myTableView.reloadData()
     }
+    
+    @IBAction func deleteBooks(_ sender: UIBarButtonItem) {
+        for book in  selectedBooksArray {
+            NSLog("Removing: %@", book.title!)
+            managedObjectContext.delete(book)
+        }
+        
+        selectedBooksArray.removeAll(keepingCapacity: false)
+        myTableView.reloadData()
+    }
+    
 }
 
